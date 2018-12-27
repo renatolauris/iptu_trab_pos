@@ -6,6 +6,7 @@ rm(list = ls())
 # install.packages(instala.pacotes)
 # install.packages("devtools")
 # devtools::install_github("tbrugz/ribge")
+# install.packages("stargazer")
 
   # carregar pacotes
   library(electionsBR)
@@ -18,6 +19,7 @@ rm(list = ls())
   library(ecoseries)
   library(dplyr)
   library(qwraps2)
+  library(stargazer)
 
   # endereco com os arquivos de dados armazenados
   endereco <- "C:\\13.Pos PUCRS\\_Trabalho final\\Projeto no github\\iptu_trab_pos\\data\\"
@@ -25,9 +27,9 @@ rm(list = ls())
   getwd()
 
   # carregar dados previamente obtidos
-  load("C:\\13.Pos PUCRS\\_Trabalho final\\Projeto no github\\iptu_trab_pos\\data\\base_carregada_21_11.RData")
+  load("C:\\13.Pos PUCRS\\_Trabalho final\\Projeto no github\\iptu_trab_pos\\data\\base_carregada_26_12.RData")
   # salva imagem dos dados utilizados
-  save.image("base_carregada_04_12.RData")
+  save.image("base_carregada_26_12.RData")
 
 #2. Iptu STN/Siconfi  ------------------------------------------------------------
 
@@ -483,8 +485,6 @@ psych::describe.by(rec.2013_2017_real, rec.2013_2017_real$ano)
 
 Hmisc::describe(rec.2013_2017_real)
 
-# install.packages("stargazer")
-library(stargazer)
 
 #7.1 estatística descritiva formatada variaveis selecionadas dados 2017
 ### inserida essa tabela no trabalho de conclusão ###
@@ -496,7 +496,7 @@ rec.2013_2017_real %>% filter(ano==2017) %>%
             out="table1.doc",summary.stat = c("n","mean","min","max","sd"))
 
 # correlacao formatada variaveis receitas municipais e populacao exemplo para analise
-rec.2013_2017_real %>% select(pop,iptuPc,itbiPc,
+rec.2013_2017_real %>% filter(ano==2017) %>% select(pop,iptuPc,itbiPc,
                               issqnPc,
                               transfIntergovRecCorr) %>% 
   data.frame() %>% na.omit() %>% cor() %>% 
@@ -1188,7 +1188,7 @@ vars_2013_2017$codMun7 <- as.character(vars_2013_2017$codMun7)
 
 str(vars_2013_2017)
 
-library("dplyr")
+library(dplyr)
 vars_2013_2017_numeric <- select_if(vars_2013_2017, is.numeric)
 
 # analise dos missing datas
@@ -1304,6 +1304,29 @@ vars_2015 %>% ggplot(aes(y = pop)) +
   scale_y_continuous(name = "População dos Municípios do Brasil") + 
   ggtitle("Boxplot da Populacao")
 
+# estatisticas descritivas com dados de 2017 de variaveis selecionadas
+var_selec1 <- c("pop","iptuPc","itbiPc","itbiPc","issqnPc","transfIntergovRecCorr")
+vars_2013_2017 %>% filter(ano==2017) %>% select(var_selec1) %>% summary()
+
+vars_2013_2017 %>% filter(ano==2017) %>% select(var_selec1) %>% 
+  data.frame() %>%   
+  stargazer(type = "html", title="Estatísticas descritivas - Variáveis selecionadas, dados 2017",
+            digits=2,decimal.mark = ",",digit.separator = ".",no.space=T,notes="Fonte: SICONFI/STN,2017",
+            out="tab_descr_var_selec.doc",summary.stat = c("n","mean","median","min","max","sd"))
+
+ggplot(rec.2013_2017_real, aes(x = popClass, y = iptuPc)) +
+  geom_boxplot()
+summary(rec.2013_2017_real$popClass)
+
+rec.2013_2017_real %>% filter(ano==2017 & as.integer(popClass)>=5) %>%
+  select(codMun7,nomeMun,iptuPc) %>% 
+  arrange(desc(iptuPc)) %>% top_n(10,iptuPc)
+
+
+vars_2013_2017 %>% filter(ano==2017) %>% select(iptuPc,
+                                                iptuRecCorr,iptuRecProp,
+                                                iptuPib) %>% 
+  summary()
 
 #16. correlacoes -------------------------------------------------------------
 
@@ -1331,10 +1354,122 @@ lm_cad <- lm(log(anoAtualiCad2015)~log(pop) +
 
 summary(lm_cad)
 
+# correlacao formatada variaveis receitas municipais e populacao exemplo para analise
+vars_2013_2017 %>% filter(ano==2017) %>% select(pop,iptuPc,itbiPc,
+                                                    issqnPc,
+                                                    transfIntergovRecCorr) %>% 
+  data.frame() %>% na.omit() %>% cor() %>% 
+  stargazer(type="text")
+
+# install.packages("PerformanceAnalytics")
+library(PerformanceAnalytics)
+vars_2013_2017 %>% filter(ano==2017) %>% select(pop,iptuPc,itbiPc,
+                                                issqnPc,
+                                                transfIntergovRecCorr) %>% 
+  chart.Correlation(histogram=TRUE, pch=19)
+
+# correlacao formatada variaveis candidatas a variavel explicada
+# iptuPc, iptuRecCorr, iptuRecProp e iptuPib
+vars_2013_2017 %>% filter(ano==2017) %>% select(iptuPc,
+                                                iptuRecCorr,iptuRecProp,
+                                                iptuPib) %>% 
+  data.frame() %>% na.omit() %>% cor() %>% 
+  stargazer(type="text")
+
+vars_2013_2017 %>% filter(ano==2017) %>% select(iptuPc,
+                                                iptuRecCorr,iptuRecProp,
+                                                iptuPib) %>% 
+  chart.Correlation(,histogram=TRUE, pch=19)
+
+# correlacao formatada variaveis iptuPC e demais variaveis explicativas Base
+vars_2013_2017 %>% filter(ano==2017) %>% select(iptuPc,pop,
+                                                densPop2,domUrbProp,
+                                                transfIntergovRecCorr,
+                                                emprHospPc,
+                                                pibMunRealPc,RDPC,
+                                                partVabAgriMun,GINI,
+                                                PMPOB,ivsInfra,
+                                                anoLeiIptu,anoInstalMunic,
+                                                anoAtualiCad2015_2,anoAtualiPlanta2015_2) %>% 
+  data.frame() %>% na.omit() %>% cor() %>% 
+  stargazer(type="text")
+
+vars_2013_2017 %>% filter(ano==2017) %>% select(iptuPc,pop,
+                          densPop2,domUrbProp,
+                          transfIntergovRecCorr,
+                          emprHospPc,
+                          pibMunRealPc,RDPC,
+                          partVabAgriMun,GINI,
+                          PMPOB,ivsInfra,
+                          anoLeiIptu,anoInstalMunic,
+                          anoAtualiCad2015_2,anoAtualiPlanta2015_2) %>% 
+  chart.Correlation(,histogram=TRUE, pch=19)
+
+
+# correlacao formatada variaveis iptuPC e demais variaveis explicativas I
+vars_2013_2017 %>% filter(ano==2017) %>% select(iptuPc,pop,
+                                                densPop2,domUrbProp) %>% 
+  data.frame() %>% na.omit() %>% cor() %>% 
+  stargazer(type="text")
+
+vars_2013_2017 %>% filter(ano==2017) %>% select(lnIptuPc,pop,
+                                                densPop2,domUrbProp) %>% 
+  chart.Correlation(,histogram=TRUE, pch=19)
+
+# correlacao formatada variaveis iptuPC e demais variaveis explicativas II
+vars_2013_2017 %>% filter(ano==2017) %>% select(iptuPc,
+                                                transfIntergovRecCorr,
+                                                emprHospPc,
+                                                anoInstalMunic) %>% 
+  data.frame() %>% na.omit() %>% cor() %>% 
+  stargazer(type="text")
+
+vars_2013_2017 %>% filter(ano==2017) %>% select(iptuPc,
+                                                transfIntergovRecCorr,
+                                                emprHospPc,
+                                                anoInstalMunic) %>% 
+  chart.Correlation(,histogram=TRUE, pch=19)
+
+# correlacao formatada variaveis iptuPC e demais variaveis explicativas III
+vars_2013_2017 %>% filter(ano==2017) %>% select(iptuPc,
+                                                pibMunRealPc,RDPC,
+                                                partVabAgriMun) %>% 
+  data.frame() %>% na.omit() %>% cor() %>% 
+  stargazer(type="text")
+
+vars_2013_2017 %>% filter(ano==2017) %>% select(iptuPc,
+                                                pibMunRealPc,RDPC,
+                                                partVabAgriMun) %>% 
+  chart.Correlation(,histogram=TRUE, pch=19)
+
+# correlacao formatada variaveis iptuPC e demais variaveis explicativas IV
+vars_2013_2017 %>% filter(ano==2017) %>% select(iptuPc,GINI,
+                                                PMPOB,ivsInfra) %>% 
+  data.frame() %>% na.omit() %>% cor() %>% 
+  stargazer(type="text")
+
+vars_2013_2017 %>% filter(ano==2017) %>% select(iptuPc,GINI,
+                                                PMPOB,ivsInfra) %>% 
+  chart.Correlation(,histogram=TRUE, pch=19)
+
+# correlacao formatada variaveis iptuPC e demais variaveis explicativas Base
+vars_2013_2017 %>% filter(ano==2017) %>% select(iptuPc,anoLeiIptu,
+                                                anoAtualiCad2015_2,
+                                                anoAtualiPlanta2015_2) %>% 
+  data.frame() %>% na.omit() %>% cor() %>% 
+  stargazer(type="text")
+
+vars_2013_2017 %>% filter(ano==2017) %>% select(iptuPc,anoLeiIptu,
+                                                anoAtualiCad2015_2,
+                                                anoAtualiPlanta2015_2) %>% 
+  chart.Correlation(,histogram=TRUE, pch=19)
+
+
 #17. regressoes por mqo --------------------------------------------------------------
 
 str(vars_2013_2017)
 
+# estatisticas descritivas das variaveis do modelo
 vars_2013_2017 %>% filter(ano=="2017") %>% select(iptuPc,pop,densPop2,domUrbProp,
     transfIntergovRecCorr,codReg,municLitoral,emprHospPc,municCapital,municMetrop,
     pibMunRealPc,RDPC,partVabAgriMun,GINI,PMPOB,ivsInfra,anoInstalMunic,
@@ -1346,6 +1481,7 @@ vars_2013_2017 %>% filter(ano=="2017") %>% select(iptuPc,pop,densPop2,domUrbProp
 
 # vars_2013_2017_naomit <- na.omit(vars_2013_2017)
 
+# regressao por mqo
 lm_lniptuPc  <- lm(log(iptuPc) ~ log(pop) + densPop2 + 
                      domUrbProp + transfIntergovRecCorr + 
                    codReg + municLitoral + emprHospPc + municCapital + municMetrop +
@@ -1372,9 +1508,45 @@ stargazer(lm_lniptuPc, title="Resultados Regressão por MQO",
 
 
 # Stepwise Regression
+step(lm_lniptuPc)
 library(MASS)
 step <- stepAIC(lm_lniptuPc, direction="both")
 step$anova # display results
+
+detach("package:dplyr", character.only = TRUE)
+library("dplyr", character.only = TRUE)
+
+# diagnostico da regressao
+# fonte de consulta: https://www.analyticsvidhya.com/blog/2016/07/deeper-regression-analysis-assumptions-plots-solutions/
+
+par(mfrow=c(2,2))
+plot(lm_lniptuPc)
+
+plot(lm_lniptuPc, which = 1:4)
+
+vars_2013_2017 %>% slice(c(15817,20446,24897)) %>% select(codMun7,nomeMun,iptuPc)
+
+hist(lm_lniptuPc$residuals)
+# install.packages("nortest")
+library(nortest)
+# teste de normalidade dos residuos da regressao por mqo
+ad.test(lm_lniptuPc$residuals)
+
+
+lm_lniptuPc2  <- lm(log(iptuPc) ~ domUrbProp + transfIntergovRecCorr + 
+                     codReg + municLitoral + emprHospPc + municMetrop +
+                     log(pibMunRealPc)+ log(RDPC) + partVabAgriMun +
+                      GINI + PMPOB + ivsInfra +
+                     anoAtualiPlanta2015_2 + anoAtualiCad2015_2, 
+                   data = vars_2013_2017)
+
+summary(lm_lniptuPc2)
+
+par(mfrow=c(2,2))
+plot(lm_lniptuPc2)
+par(mfrow=c(1,1))
+hist(lm_lniptuPc2$residuals)
+ad.test(lm_lniptuPc2$residuals)
 
 # regressao quantilica
 library(quantreg)
@@ -1410,8 +1582,14 @@ sfa_lniptuPc  <- sfa(log(iptuPc) ~ log(pop) + densPop2 +
 
 summary(sfa_lniptuPc)
 
+plot(sfa_lniptuPc$resid)
+library(car)
+qqnorm(sfa_lniptuPc$resid)
+qqPlot(sfa_lniptuPc$resid)
+
+par(mfrow=c(2,2))
+
 dim(efficiencies(sfa_lniptuPc))
-efficiencies(sfa_lniptuPc)
 head(efficiencies(sfa_lniptuPc))
 eff<- as.matrix(efficiencies(sfa_lniptuPc))
 eff<-as.data.frame(eff)
@@ -1453,18 +1631,20 @@ sfa_t_lniptuPc  <- sfa(log(iptuPc) ~ log(pop) + densPop2 +
                      timeEffect = TRUE)
 
 summary(sfa_t_lniptuPc)
-dim(efficiencies(sfa_t_lniptuPc))
 
+dim(efficiencies(sfa_t_lniptuPc))
 head(efficiencies(sfa_t_lniptuPc))
 eff2<- as.matrix(efficiencies(sfa_t_lniptuPc))
 eff2<-as.data.frame(eff2)
 eff2$codMun7<-rownames(eff2)
+library(reshape)
 eff2<-melt(eff2,id.vars="codMun7")
 colnames(eff2)<-c("codMun7","ano","efic_dsfa")
 vars_2013_2017_pdata <- left_join(vars_2013_2017_pdata,eff2,by=c("codMun7","ano"))
 
 detach("package:dplyr", character.only = TRUE)
 library("dplyr", character.only = TRUE)
+
 #18.3. ranking dos 10 piores do RS
 vars_2013_2017_pdata %>% filter(ufSigla=="RS" & ano==2017) %>%
   select(codMun7,nomeMun,iptuPc,efic_sfa,efic_dsfa) %>% 
@@ -1483,7 +1663,7 @@ vars_2013_2017_pdata %>% filter(ufSigla=="RS" & ano==2017) %>%
             out="top10_rs.doc",summary=FALSE, rownames=FALSE)
 
 
-#18.5. ranking indices do RS
+#18.5. ranking indices do RS e do Brasil
 vars_2013_2017_pdata %>% filter(ufSigla=="RS" & ano==2017) %>%
   select(codMun7,nomeMun,iptuPc,efic_sfa,efic_dsfa) %>% 
   arrange(desc(efic_dsfa))%>%  
@@ -1491,8 +1671,25 @@ vars_2013_2017_pdata %>% filter(ufSigla=="RS" & ano==2017) %>%
             digits=2,decimal.mark = ",",digit.separator = ".",no.space=T,
             out="lista_rs.doc",summary=FALSE, rownames=FALSE)
 
-vars_2013_2017_pdata %>% filter(ufSigla=="RS" & ano==2017) %>%
-  select(codMun7,nomeMun,iptuPc,efic_sfa,efic_dsfa)
+tab_efic_rs <- vars_2013_2017_pdata %>% filter(ufSigla=="RS" & ano==2017) %>%
+  select(codMun7,nomeMun,iptuPc,efic_sfa,efic_dsfa) %>% 
+  arrange(codMun7)
+library(xlsx)
+write.xlsx2(tab_efic_rs,"tab_efic_rs.xlsx")
+
+tab_efic_br <- vars_2013_2017_pdata %>% filter(ano==2017) %>%
+  select(codMun7,nomeMun,iptuPc,efic_sfa,efic_dsfa) %>% 
+  arrange(codMun7)
+write.xlsx2(tab_efic_br,"tab_efic_br.xlsx")
+
+vars_2013_2017_pdata %>% filter(codMun7=="4300604") %>% 
+  select(codMun7,nomeMun,ano,iptuPc,efic_sfa,efic_dsfa,
+         pop,densPop2,domUrbProp,transfIntergovRecCorr,
+         codReg,municLitoral,emprHospPc,
+         municCapital,municMetrop,
+         pibMunRealPc,RDPC,partVabAgriMun,
+         GINI,PMPOB,ivsInfra,
+         anoInstalMunic,anoAtualiPlanta2015_2,anoAtualiCad2015_2)
 
 #18.6. Estima o IPTU otimo com base no indice de eficiencia
 vars_2013_2017_pdata$iptuOtimo<-(1/vars_2013_2017_pdata$efic_dsfa)*vars_2013_2017_pdata$iptu
@@ -1505,5 +1702,15 @@ vars_2013_2017_pdata %>% filter(ufSigla=="RS" & ano==2017) %>%
             digits=2,decimal.mark = ",",digit.separator = ".",no.space=T,
             out="iptu_otimo_rs.doc",summary=FALSE, rownames=FALSE)
   
+vars_2013_2017_pdata %>% filter(ufSigla=="RS" & ano==2017) %>%
+  select(codMun7,nomeMun,iptuPc,efic_sfa,efic_dsfa,iptu,iptuOtimo)%>% 
+  summarise(iptuReal=sum(iptu,na.rm = T),iptuOtimo=sum(iptuOtimo,na.rm = T),
+            iptuPotencial=sum(iptuOtimo,na.rm = T)/sum(iptu,na.rm = T)*100)
+
+vars_2013_2017_pdata %>% filter(ano==2017) %>%
+  select(codMun7,nomeMun,iptuPc,efic_sfa,efic_dsfa,iptu,iptuOtimo)%>% 
+  summarise(iptuReal=sum(iptu,na.rm = T),iptuOtimo=sum(iptuOtimo,na.rm = T),
+            iptuPotencial=sum(iptuOtimo,na.rm = T)/sum(iptu,na.rm = T)*100)
+
   vars_2013_2017_pdata %>% filter(ufSigla=="RS" & ano==2017) %>%
     select(codMun7,nomeMun,iptuPc,efic_sfa,efic_dsfa,iptu,iptuOtimo) %>% summary()

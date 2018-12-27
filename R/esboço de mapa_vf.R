@@ -61,7 +61,7 @@ RS.f %>% ggplot(., aes(long, lat, group = group, map_id = id, fill = iptuPib)) +
        y = NULL, 
        title = "Heterogeneidade da arrecadação do IPTU", 
        subtitle = "Iptu sobre o PIB (%) no RS, 2015", 
-       caption = "Elaborado pelo autor, com base nos dados de IPTU do SICONFI/STN.")
+       caption = "Fonte: SICONFI/STN.")
 
 # mapa RS iptuPc
 RS.f %>% ggplot(., aes(long, lat, group = group, map_id = id, fill = iptuPc)) +  
@@ -74,7 +74,7 @@ RS.f %>% ggplot(., aes(long, lat, group = group, map_id = id, fill = iptuPc)) +
        y = NULL, 
        title = "Heterogeneidade da arrecadação do IPTU", 
        subtitle = "Iptu per capita no RS, 2017", 
-       caption = "Elaborado pelo autor, com base nos dados de IPTU do SICONFI/STN.")
+       caption = "Fonte: SICONFI/STN.")
 
 # mapa Brasil Iptu sobre o PIB
 BR.f %>% ggplot(., aes(long, lat, group = group, map_id = id, fill = iptuPib)) +  
@@ -87,7 +87,7 @@ BR.f %>% ggplot(., aes(long, lat, group = group, map_id = id, fill = iptuPib)) +
        y = NULL, 
        title = "Heterogeneidade da arrecadação do IPTU", 
        subtitle = "Iptu sobre o PIB (%) no Brasil, 2015", 
-       caption = "Elaborado pelo autor, com base nos dados de IPTU do SICONFI/STN.")
+       caption = "Fonte: SICONFI/STN.")
 
 # mapa Brasil Iptu per capita
 BR.f %>% ggplot(., aes(long, lat, group = group, map_id = id, fill = iptuPc)) +  
@@ -100,7 +100,7 @@ BR.f %>% ggplot(., aes(long, lat, group = group, map_id = id, fill = iptuPc)) +
        y = NULL, 
        title = "Heterogeneidade da arrecadação do IPTU", 
        subtitle = "Iptu per capita no Brasil, 2017", 
-       caption = "Elaborado pelo autor, com base nos dados de IPTU do SICONFI/STN.")
+       caption = "Fonte: SICONFI/STN.")
 
 
 constroi_mapa_log(RS.f,RS.f$iptuPc,"Iptu per capita (em log)",
